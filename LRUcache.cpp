@@ -63,19 +63,26 @@ public:
 };
 
 int main() {
-    LRUCache cache(3);
+    // Create a cache with capacity 5
+    LRUCache cache(5);
 
-    cache.put(1, 100);
-    cache.put(2, 200);
-    cache.put(3, 300);
+    // Add 10 key-value pairs (to test eviction)
+    for (int i = 1; i <= 10; i++) {
+        cache.put(i, i * 100); // key=i, value=i*100
+        cout << "After inserting (" << i << "," << i * 100 << "):\n";
+        cache.display();
+    }
 
-    cout << "get(2): " << cache.get(2) << "\n"; // Access key 2
-
+    // Access some keys to make them most recently used
+    cout << "\nAccess key 7: " << cache.get(7) << "\n";
     cache.display();
 
-    cache.put(4, 400); // Evicts key 1
+    cout << "\nAccess key 3: " << cache.get(3) << "\n"; // likely evicted
     cache.display();
 
-    cout << "get(1): " << cache.get(1) << "\n"; // Should return -1
+    cout << "\nAccess key 10: " << cache.get(10) << "\n";
+    cache.display();
+
+    return 0;
 }
 
