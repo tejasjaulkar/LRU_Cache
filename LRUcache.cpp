@@ -2,7 +2,6 @@
 #include <unordered_map>
 #include <list>
 #include <stdexcept>
-#include <optional>  // for std::optional (C++17+)
 
 using namespace std;
 
@@ -35,8 +34,8 @@ public:
         return it->second->second;
     }
 
-    // Put key-value pair, returns evicted {key,value} if any
-    optional<pair<int,int>> put(int key, int value) {
+    // Put key-value pair
+    void put(int key, int value) {
         auto it = mp.find(key);
 
         // If key exists, update value and move to front
@@ -44,24 +43,21 @@ public:
             it->second->second = value;
             dll.splice(dll.begin(), dll, it->second);
             hits++; // updating existing key = hit
-            return nullopt;
+            return;
         }
 
         pageFaults++; // new page -> fault
-        optional<pair<int,int>> evicted = nullopt;
 
         // If cache is full, remove least recently used (back)
         if ((int)dll.size() >= capacity) {
             auto last = dll.back();
             mp.erase(last.first);
             dll.pop_back();
-            evicted = last; // store evicted key/value
         }
 
         // Insert new key-value at front
         dll.emplace_front(key, value);
         mp[key] = dll.begin();
-        return evicted;
     }
 
     // Display cache from MRU ? LRU
@@ -106,12 +102,9 @@ int main() {
 
     // Add 10 key-value pairs (to test eviction)
     for (int i = 1; i <= 10; i++) {
-        auto evicted = cache.put(i, i * 100); // key=i, value=i*100
+        cache.put(i, i * 100); // key=i, value=i*100
         cout << "After inserting (" << i << "," << i * 100 << "):\n";
         cache.display();
-        if (evicted) {
-            cout << "Evicted: [" << evicted->first << ":" << evicted->second << "]\n";
-        }
     }
 
     // Access some keys to make them most recently used
